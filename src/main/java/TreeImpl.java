@@ -1,3 +1,5 @@
+import java.util.Stack;
+
 public class TreeImpl<E extends Comparable <? super E>> implements Tree<E> {
 
     private Node<E> root;
@@ -43,11 +45,111 @@ public class TreeImpl<E extends Comparable <? super E>> implements Tree<E> {
     }
 
     public boolean remove(E value) {
-        return false;
+        NodeAndParent nodeAndParent = doFind(value);
+        Node<E> removedNode = nodeAndParent.node;
+        Node<E> parent = nodeAndParent.parent;
+
+        if (removedNode == null) return false;
+
+        if (removedNode.isLeaf())removeLeafNode(parent,removedNode);
+        else if (removedNode.hasOnlySingleChild()) removeNodeWithSingleChild(parent,removedNode);
+        else removeCommonNode(parent,removedNode);
+        size--;
+        return true;
+    }
+
+    private void removeCommonNode(Node<E> parent, Node<E> removedNode) {
+        Node<E> successor = getSuccessor(removedNode);
+        if (removedNode == root) {
+            root = successor;
+        } else if (parent.getLeftChild() == removedNode) {
+            parent.setLeftChild(successor);
+        } else {
+            parent.setRightChild(successor);
+        }
+        successor.setLeftChild(removedNode.getLeftChild());
+    }
+
+    private Node<E> getSuccessor(Node<E> removedNode) {
+        Node<E> successor = removedNode;
+        Node<E> successorParent = null;
+        Node<E> current = removedNode.getRightChild();
+
+        while (current != null) {
+            successorParent = successor;
+            successor = current;
+            current = current.getLeftChild();
+        }
+
+        if (successor != removedNode.getRightChild()) {
+            successorParent.setLeftChild(successor.getRightChild());
+            successor.setRightChild(removedNode.getRightChild());
+        }
+
+        return successor;
+    }
+
+    private void removeNodeWithSingleChild(Node<E> parent, Node<E> removedNode) {
+        Node<E> child = removedNode.getLeftChild() != null
+                ? removedNode.getLeftChild()
+                : removedNode.getRightChild();
+
+        if (removedNode == root) root = child;
+        else if (parent.getLeftChild() == removedNode) parent.setLeftChild(child);
+        else parent.setRightChild(child);
+    }
+
+    private void removeLeafNode(Node<E> parent, Node<E> removedNode) {
+        if (removedNode == root) root = null;
+        else if (parent.getLeftChild() == removedNode)
+            parent.setLeftChild(null);
+        else parent.setRightChild(null);
     }
 
     public void display() {
+        Stack<Node> globalStack = new Stack<>();
+        globalStack.push(root);
+        int nBlanks = 64;
 
+        boolean isRowEmpty = false;
+        System.out.println("................................................................");
+
+        while (!isRowEmpty) {
+            Stack<Node> localStack = new Stack<>();
+
+            isRowEmpty = true;
+            for (int i = 0; i < nBlanks; i++) {
+                System.out.print(" ");
+            }
+
+            while (!globalStack.isEmpty()) {
+                Node tempNode = globalStack.pop();
+                if (tempNode != null) {
+                    System.out.print(tempNode.getValue());
+                    localStack.push(tempNode.getLeftChild());
+                    localStack.push(tempNode.getRightChild());
+                    if (tempNode.getLeftChild() != null || tempNode.getRightChild() != null) {
+                        isRowEmpty = false;
+                    }
+                } else {
+                    System.out.print("--");
+                    localStack.push(null);
+                    localStack.push(null);
+                }
+                for (int j = 0; j < nBlanks * 2 - 2; j++) {
+                    System.out.print(" ");
+                }
+            }
+
+            System.out.println();
+
+            while (!localStack.isEmpty()) {
+                globalStack.push(localStack.pop());
+            }
+
+            nBlanks /= 2;
+        }
+        System.out.println("................................................................");
     }
 
     public int size() {
