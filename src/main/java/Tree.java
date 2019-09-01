@@ -14,7 +14,7 @@ public interface Tree<E> {
     int size();
     boolean isEmpty();
 
-    boolean isBallanced();
+    boolean isBalanced();
 
     void traverse (TraverseMode mode);
 }
