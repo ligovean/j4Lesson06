@@ -15,10 +15,10 @@ public class TreeImpl<E extends Comparable <? super E>> implements Tree<E> {
             return true;
         }
 
-        NodeAndParrent nodeAndParrent = doFind(value);
-        if (nodeAndParrent.node != null) return false;
+        NodeAndParent NodeAndParent = doFind(value);
+        if (NodeAndParent.node != null) return false;
 
-        Node<E> previous = nodeAndParrent.parent;
+        Node<E> previous = NodeAndParent.parent;
 
         if (previous.shouldBeLeft(value)) previous.setLeftChild(node);
         else previous.setRightChild(node);
@@ -27,19 +27,19 @@ public class TreeImpl<E extends Comparable <? super E>> implements Tree<E> {
         return true;
     }
 
-    private NodeAndParrent doFind(E value){
+    private NodeAndParent doFind(E value){
         Node<E> parent = null;
         Node<E> current = this.root;
 
         while (current != null){
-            if (current.getValue().equals(value)) return new NodeAndParrent(current,parent);
+            if (current.getValue().equals(value)) return new NodeAndParent(current,parent);
             parent = current;
 
             if (current.shouldBeLeft(value)) current = current.getLeftChild();
-            else current = current.getLeftChild();
+            else current = current.getRightChild();
         }
 
-        return new NodeAndParrent(null,parent);
+        return new NodeAndParent(null,parent);
     }
 
     public boolean remove(E value) {
@@ -58,14 +58,61 @@ public class TreeImpl<E extends Comparable <? super E>> implements Tree<E> {
         return (root == null);
     }
 
+    @Override
+    public void traverse(TraverseMode mode) {
+        switch (mode) {
+            case IN_ORDER:
+                inOrder(root);
+                break;
+            case PRE_ORDER:
+                preOrder(root);
+                break;
+            case POST_ORDER:
+                postOrder(root);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown mode: " + mode);
+        }
+    }
+
+    private void postOrder(Node<E> node) {
+        if (node == null) {
+            return;
+        }
+
+        postOrder(node.getLeftChild());
+        postOrder(node.getRightChild());
+        System.out.println(node.getValue());
+    }
+
+    private void preOrder(Node<E> node) {
+        if (node == null) {
+            return;
+        }
+
+        System.out.println(node.getValue());
+        preOrder(node.getLeftChild());
+        preOrder(node.getRightChild());
+    }
+
+    private void inOrder(Node<E> node) {
+        if (node == null) {
+            return;
+        }
+
+        inOrder(node.getLeftChild());
+        System.out.println(node.getValue());
+        inOrder(node.getRightChild());
+    }
+
     public boolean isBallanced() {
         return false;
     }
 
-    private class NodeAndParrent{
+    private class NodeAndParent{
         Node<E> node;
         Node<E> parent;
-        public NodeAndParrent(Node<E> node, Node<E> parent) {
+        public NodeAndParent(Node<E> node, Node<E> parent) {
             this.node = node;
             this.parent = parent;
         }

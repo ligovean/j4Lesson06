@@ -1,5 +1,11 @@
 public interface Tree<E> {
 
+    enum TraverseMode {
+        IN_ORDER,
+        PRE_ORDER,
+        POST_ORDER
+    }
+
     boolean find(E value);
     boolean add(E value);
     boolean remove(E value);
@@ -9,4 +15,6 @@ public interface Tree<E> {
     boolean isEmpty();
 
     boolean isBallanced();
+
+    void traverse (TraverseMode mode);
 }
